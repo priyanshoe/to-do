@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import axios from 'axios'
 
-export default function add() {
+export default function Add() {
   const [task, setTask] = useState({ title: '', description: '' })
   const router = useRouter()
 
