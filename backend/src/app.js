@@ -22,7 +22,5 @@ app.get('/',(req,res)=>{
   res.send("Server is listening")
 })
 
-console.log("url",process.env.PUBLIC_URL);
-
 
 module.exports = app;
