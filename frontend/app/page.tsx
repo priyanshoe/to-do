@@ -16,15 +16,23 @@ export default function Home() {
       password: ""
     }
   );
+  const [conform_password, setConform_password] = useState("")
+
   const handleChangeSignUp = (e: React.ChangeEvent<HTMLInputElement>) => {
     setsignUpData({ ...signUpData, [e.target.name]: e.target.value });
   };
 
   const handleSignUp = (e: React.FormEvent) => {
     e.preventDefault();
+    if(signUpData.password !== conform_password)
+      return alert("Password not matched");
     axios.post('http://localhost:3030/api/auth/signup', signUpData, { withCredentials: true })
-      .then(res => console.log(res))
-      .then(() => router.push('/tasks'))
+      .then(res => {
+        console.log(res);
+        if(res.data == "user already exist"){alert("User already exist")}
+        else{router.push('/tasks')}
+        
+      })
       .catch(err => console.log(err));
 
   }
@@ -162,6 +170,14 @@ export default function Home() {
             value={signUpData.password}
             name="password"
             onChange={handleChangeSignUp}
+            className="mb-3 px-4 py-2 w-full rounded bg-gray-200 placeholder-gray-500 focus:outline-none"
+          />
+          <input
+            type="password"
+            placeholder="Conform Password"
+            value={conform_password}
+            name="conform_password"
+            onChange={(e)=> setConform_password(e.target.value)}
             className="mb-3 px-4 py-2 w-full rounded bg-gray-200 placeholder-gray-500 focus:outline-none"
           />
           <button
