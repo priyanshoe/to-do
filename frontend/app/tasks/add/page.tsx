@@ -10,7 +10,7 @@ export default function add() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    axios.post('http://localhost:3030/api/tasks/add', task, { withCredentials: true })
+    axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/tasks/add`, task, { withCredentials: true })
     .then(() => router.push('/tasks'))
     .catch(err => console.error(err));
   }

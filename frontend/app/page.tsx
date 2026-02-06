@@ -26,7 +26,7 @@ export default function Home() {
     e.preventDefault();
     if(signUpData.password !== conform_password)
       return alert("Password not matched");
-    axios.post('http://localhost:3030/api/auth/signup', signUpData, { withCredentials: true })
+    axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/signup`, signUpData, { withCredentials: true })
       .then(res => {
         console.log(res);
         if(res.data == "user already exist"){alert("User already exist")}
@@ -36,8 +36,6 @@ export default function Home() {
       .catch(err => console.log(err));
 
   }
-
-
 
 
   const [signInData, setsignInData] = useState(
@@ -53,7 +51,7 @@ export default function Home() {
 
   const handleSignIn = (e: React.FormEvent) => {
     e.preventDefault();
-    axios.post('http://localhost:3030/api/auth/login', signInData, { withCredentials: true })
+    axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/login`, signInData, { withCredentials: true })
         .then(res => {
             if (res.data == 1) {
                 router.push('/tasks');

@@ -35,10 +35,10 @@ export default function TodoPage() {
 
 
   const [tasks, setTasks] = useState([])
-  
+
 
   useEffect(() => {
-    axios.get('http://localhost:3030/api/tasks', { withCredentials: true })
+    axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/tasks`, { withCredentials: true })
       .then(res => {
         setTasks(res.data);
 
@@ -48,7 +48,7 @@ export default function TodoPage() {
   }, [])
 
   const handleLogOut = () => {
-    axios.get('http://localhost:3030/api/auth/logout', { withCredentials: true })
+    axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/logout`, { withCredentials: true })
       .then(() => router.push('/'))
       .catch(err => console.error(err));
   }
@@ -56,7 +56,7 @@ export default function TodoPage() {
   const handleDelete = (id:number) =>{
     console.log(id);
     
-    axios.post('http://localhost:3030/api/tasks/delete', {id},  { withCredentials: true })
+    axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/tasks/delete`, {id},  { withCredentials: true })
     .then(()=> window.location.reload())
     .catch(err => console.error(err))
   }
