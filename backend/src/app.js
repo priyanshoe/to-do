@@ -6,7 +6,7 @@ const cookieParser = require("cookie-parser");
 const cors = require('cors');
 app.use(cookieParser());
 app.use(cors({
-  origin: "http://localhost:3000", // frontend URL
+  origin: process.env.PUBLIC_URL, // frontend URL
   credentials: true                // 👈 allow cookies
 }));
 app.use(express.json());
@@ -22,6 +22,7 @@ app.get('/',(req,res)=>{
   res.send("Server is listening")
 })
 
+console.log("url",process.env.PUBLIC_URL);
 
 
 module.exports = app;
