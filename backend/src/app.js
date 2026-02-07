@@ -4,11 +4,11 @@ const cookieParser = require("cookie-parser");
 
 
 const cors = require('cors');
-app.use(cookieParser());
 app.use(cors({
-  origin: process.env.PUBLIC_URL, // frontend URL
+  origin: process.env.ACCESS_URL, // frontend URL
   credentials: true                // 👈 allow cookies
 }));
+app.use(cookieParser());
 app.use(express.json());
 
 

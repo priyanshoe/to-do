@@ -25,7 +25,12 @@ function registerUser(req, res) {
         db.query(insertUser, [values], (err, data) => {
             if (err) return res.json(err);
             var token = jwt.sign({ userId: data.insertId }, jwt_secret);
-            res.cookie("token", token);
+            res.cookie("token", token, {
+                httpOnly: true,
+                secure: true,          // required for HTTPS (Vercel)
+                sameSite: "none",      // required for cross-site cookies
+                path: "/",
+            });
             return res.json("Register Success");
         })
     })
@@ -48,7 +53,12 @@ function loginUser(req, res) {
 
             if (result) {
                 var token = jwt.sign({ userId: data[0].userId }, jwt_secret);
-                res.cookie("token", token);
+                res.cookie("token", token, {
+                    httpOnly: true,
+                    secure: true,          // required for HTTPS (Vercel)
+                    sameSite: "none",      // required for cross-site cookies
+                    path: "/",
+                });
                 return res.json(1);
             }
             else {
@@ -61,7 +71,12 @@ function loginUser(req, res) {
 
 
 function logoutUser(req, res) {
-    res.clearCookie("token");
+    res.clearCookie("token", {
+        httpOnly: true,
+        secure: true,          // required for HTTPS (Vercel)
+        sameSite: "none",      // required for cross-site cookies
+        path: "/",
+    });
     return res.json("Logged out");
 }
 
