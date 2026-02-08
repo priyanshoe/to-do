@@ -24,16 +24,17 @@ export default function Home() {
 
   const handleSignUp = (e: React.FormEvent) => {
     e.preventDefault();
-    if(signUpData.password !== conform_password)
+    if (signUpData.password !== conform_password)
       return alert("Password not matched");
     axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/signup`, signUpData, { withCredentials: true })
       .then(res => {
-        console.log(res);
-        if(res.data == "user already exist"){alert("User already exist")}
-        else{router.push('/tasks')}
-        
+        alert(res.data.message)
+        router.push('/tasks')
       })
-      .catch(err => console.log(err));
+      .catch(err => {
+        alert(err.response.data.message)
+        console.error(err)
+      });
 
   }
 
@@ -52,14 +53,16 @@ export default function Home() {
   const handleSignIn = (e: React.FormEvent) => {
     e.preventDefault();
     axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/login`, signInData, { withCredentials: true })
-        .then(res => {
-            if (res.data == 1) {
-                router.push('/tasks');
-            } else alert("Invalid credentials");
-        })
-        .catch(err => console.error(err));
+      .then(res => {
+        alert(res.data.message)
+        router.push('/tasks');
+      })
+      .catch(err => {
+        alert(err.response.data.message)
+        console.error(err)
+      });
   }
-  
+
 
   const [isSignIn, setisSignIn] = useState(false)
   return (
@@ -71,7 +74,7 @@ export default function Home() {
         <button
           onClick={() => setisSignIn(!isSignIn)}
           type="submit"
-          className="bg-transparent border-1 transition-all duration-750 border-white text-white font-bold rounded-full px-8 py-2 text-lg shadow hover:bg-red-500 "
+          className="bg-transparent border transition-all duration-750 border-white text-white font-bold rounded-full px-8 py-2 text-lg shadow hover:bg-red-500 "
         >
           {isSignIn ? "Sign In" : "Sign Up"}
         </button>
@@ -102,6 +105,7 @@ export default function Home() {
             type="email"
             placeholder="Email"
             name="email"
+            required
             value={signInData.email}
             onChange={handleChangeSignIn}
             className="mb-3 px-4 py-2 w-full rounded bg-gray-200 placeholder-gray-500 focus:outline-none"
@@ -110,6 +114,7 @@ export default function Home() {
             type="password"
             placeholder="Password"
             name="password"
+            required
             value={signInData.password}
             onChange={handleChangeSignIn}
             className="mb-3 px-4 py-2 w-full rounded bg-gray-200 placeholder-gray-500 focus:outline-none"
@@ -149,6 +154,7 @@ export default function Home() {
           <input
             type="text"
             placeholder="Name"
+            required
             value={signUpData.name}
             name="name"
             onChange={handleChangeSignUp}
@@ -159,6 +165,7 @@ export default function Home() {
             placeholder="Email"
             value={signUpData.email}
             name="email"
+            required
             onChange={handleChangeSignUp}
             className="mb-3 px-4 py-2 w-full rounded bg-gray-200 placeholder-gray-500 focus:outline-none"
           />
@@ -167,6 +174,7 @@ export default function Home() {
             placeholder="Password"
             value={signUpData.password}
             name="password"
+            required
             onChange={handleChangeSignUp}
             className="mb-3 px-4 py-2 w-full rounded bg-gray-200 placeholder-gray-500 focus:outline-none"
           />
@@ -175,7 +183,8 @@ export default function Home() {
             placeholder="Conform Password"
             value={conform_password}
             name="conform_password"
-            onChange={(e)=> setConform_password(e.target.value)}
+            required
+            onChange={(e) => setConform_password(e.target.value)}
             className="mb-3 px-4 py-2 w-full rounded bg-gray-200 placeholder-gray-500 focus:outline-none"
           />
           <button

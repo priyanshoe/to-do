@@ -1,72 +1,61 @@
 require('dotenv').config();
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
-const db = require('../db/connection')
+const pool = require('../db/connection')
 
 const table_name = process.env.Users_Table;
 const jwt_secret = process.env.JWT_SECRET;
 
 
-function registerUser(req, res) {
-
-    const checkUser = `SELECT * FROM ${table_name} WHERE email = ?`
-    db.query(checkUser, [req.body.email], async (err, result) => {
-        if (err) return res.json(err);
-
-        if (result.length > 0) return res.json("user already exist")
-
-        const hash = await bcrypt.hash(req.body.password, 10)
-        const values = [
-            req.body.name,
-            req.body.email,
-            hash,
-        ]
-        const insertUser = `INSERT INTO ${table_name} (\`name\`, \`email\`, \`password\`) values (?)`;
-        db.query(insertUser, [values], (err, data) => {
-            if (err) return res.json(err);
-            var token = jwt.sign({ userId: data.insertId }, jwt_secret);
-            res.cookie("token", token, {
-                httpOnly: true,
-                secure: true,          // required for HTTPS (Vercel)
-                sameSite: "none",      // required for cross-site cookies
-                path: "/",
-            });
-            return res.json("Register Success");
+async function registerUser(req, res) {
+    try{
+        const { name, email, password} = req.body;
+        const checkUser = `SELECT * FROM ${table_name} WHERE email = ?`;
+        const [user] = await pool.query(checkUser, [email]);
+        if(user.length > 0) return res.status(409).json({message:"user alreay exist"});
+        const hash = await bcrypt.hash(password, 5);
+        const insertUser =  `INSERT INTO ${table_name} (name, email, password) VALUES (?,?,?)`;
+        const [insertedUser] = await pool.query(insertUser,[name,email,hash])
+        const token = jwt.sign({userId: insertedUser.insertId}, jwt_secret)
+        res.cookie("token",token,{
+            httpOnly :true,
+            secure: true,
+            sameSite: 'none',
+            path:'/'
         })
-    })
+        return res.status(200).json({message:"user regestered"})
+
+
+    } catch (err) {
+        return res.status(500).json({ message: "regestration failed", error: err.message });
+    }
+
 }
 
 
-function loginUser(req, res) {
+async function loginUser(req, res) {
 
-    const sql = `SELECT * FROM ${table_name} WHERE email = ?`;
-    db.query(sql, [req.body.email], (err, data) => {
-        if (err) return res.json(err);
+    try {
 
-        if (data.length === 0) {
-            return res.json({ message: "User not found" });
-        }
+        const { email, password } = req.body;
+        const checkUser = `SELECT * FROM ${table_name} WHERE email = ?`;
+        const [user] = await pool.query(checkUser, [email]);
+        if (user.length === 0) return res.status(404).json({ message: "user not found" })
+        const hash = await bcrypt.compare(password, user[0].password)
+        if (!hash) return res.status(401).json({ message: "wrong credential" });
+        const token = jwt.sign({ userId: user[0].userId }, jwt_secret)
+        res.cookie("token", token, {
+            httpOnly: true,
+            secure: true,
+            sameSite: "none",
+            path: "/",
+        })
+        return res.status(200).json({ message: "login success" });
 
-        bcrypt.compare(req.body.password, data[0].password, function (err, result) {
-            if (err) return res.json(err);
+    } catch (err) {
+        return res.status(500).json({ message: "login failed", error: err.message });
+    }
 
-
-            if (result) {
-                var token = jwt.sign({ userId: data[0].userId }, jwt_secret);
-                res.cookie("token", token, {
-                    httpOnly: true,
-                    secure: true,          // required for HTTPS (Vercel)
-                    sameSite: "none",      // required for cross-site cookies
-                    path: "/",
-                });
-                return res.json(1);
-            }
-            else {
-                return res.json(0);
-            }
-
-        });
-    })
 }
 
 

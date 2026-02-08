@@ -5,7 +5,10 @@ const cookieParser = require("cookie-parser");
 
 const cors = require('cors');
 app.use(cors({
-  origin: process.env.ACCESS_URL, // frontend URL
+  origin: [
+    "http://localhost:3000", // frontend URL
+    process.env.ACCESS_URL
+  ],
   credentials: true                // 👈 allow cookies
 }));
 app.use(cookieParser());
