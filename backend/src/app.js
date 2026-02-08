@@ -21,9 +21,6 @@ app.use('/api/tasks', tasks)
 const auth = require('./routes/auth.routes')
 app.use('/api/auth', auth);
 
-app.get('/',(req,res)=>{
-  res.send("Server is listening")
-})
 
 
 module.exports = app;
