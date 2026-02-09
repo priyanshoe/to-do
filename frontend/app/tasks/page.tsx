@@ -33,15 +33,21 @@ export default function TodoPage() {
       .catch(err => {
         alert(err.response.data.message)
         router.push("/")
-        console.error(err)
+        console.error(err.data)
       });
 
   }, [])
 
   const handleLogOut = () => {
-    axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/logout`, { withCredentials: true })
-      .then(() => router.push('/'))
-      .catch(err => console.error(err));
+    axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/logout`,{}, { withCredentials: true })
+      .then(res => {
+        alert(res.data.message)
+        router.push('/')
+      })
+      .catch(err => {
+        alert(err.response.data.message)
+        console.error(err.data)
+      });
   }
 
   const handleDelete = (id: number) => {
