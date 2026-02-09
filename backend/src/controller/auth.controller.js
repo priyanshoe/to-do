@@ -60,13 +60,17 @@ async function loginUser(req, res) {
 
 
 function logoutUser(req, res) {
-    res.clearCookie("token", {
-        httpOnly: true,
-        secure: true,          // required for HTTPS (Vercel)
-        sameSite: "none",      // required for cross-site cookies
-        path: "/",
-    });
-    return res.status(200).json("Logged out");
+    try{
+        res.clearCookie("token", {
+            httpOnly: true,
+            secure: true,          // required for HTTPS (Vercel)
+            sameSite: "none",      // required for cross-site cookies
+            path: "/",
+        });
+        return res.status(200).json({message:"Logged out"});
+    } catch (err) {
+        return res.status(500).json({ message: "login failed", error: err.message });
+    }
 }
 
 
