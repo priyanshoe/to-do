@@ -66,7 +66,7 @@ function logoutUser(req, res) {
         sameSite: "none",      // required for cross-site cookies
         path: "/",
     });
-    return res.json("Logged out");
+    return res.status(200).json("Logged out");
 }
 
 
