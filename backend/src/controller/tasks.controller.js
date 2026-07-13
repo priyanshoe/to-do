@@ -28,13 +28,17 @@ async function createTask(req, res) {
         const data = [
             tokenData.userId,
             req.body.title,
-            req.body.description
+            req.body.description,
+            req.body.category,
+            req.body.dueDate,
+            req.body.priority
         ]
-        const query = `INSERT INTO ${table_name} (userId, title, description) VALUES (?,?,?)`;
+        const query = `INSERT INTO ${table_name} (userId, title, description,category,dueDate,priority) VALUES (?,?,?,?,?,?)`;
         const [inserted] = await pool.query(query, data);
         return res.status(200).json({ message: "task added", data: inserted })
 
     } catch (err) {
+        console.log(err);
         return res.status(500).json({ message: "failed", error: err.message });
     }
 }

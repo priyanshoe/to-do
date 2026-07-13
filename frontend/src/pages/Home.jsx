@@ -27,7 +27,7 @@ export default function Home({ onAuthSuccess }) {
   const [error, setError] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
 
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || '';
+  const apiUrl = import.meta.env.VITE_API_URL || '';
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
