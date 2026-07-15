@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
-const pool = require('../db/connection')
+const pool = require('../db/connection');
+const redisClient = require('../redis/redisClient');
 
 require('dotenv').config();
 const jwt_secret = process.env.JWT_SECRET;
@@ -10,8 +11,24 @@ async function getTasks(req, res) {
         token = req.cookies.token;
         if (!token) return res.status(401).json({ message: "Please login first" });
         const tokenData = jwt.verify(token, jwt_secret);
+        
+        const cachedTask = await redisClient.get("tasks");
+        if(cachedTask){
+            console.log("Data from redis");
+            return res.status(200).json({message:"Data", data: JSON.parse(cachedTask)})
+        }
+        
         const query = `SELECT * FROM ${table_name} WHERE userId = ?`
         const [data] = await pool.query(query, [tokenData.userId])
+
+        await redisClient.set(
+            "tasks",
+            JSON.stringify(data),
+            {
+                EX:60
+            }
+        );
+
         return res.status(200).json({ message: "Data", data: data })
 
     } catch (err) {

@@ -1,6 +1,0 @@
-{
-  "name": "VividDo - Interactive Tasks",
-  "description": "An immersive single-page task manager crafted in React JS. Features floating ambient background bubbles, smooth transitions, and multi-mode support.",
-  "requestFramePermissions": [],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
-}
