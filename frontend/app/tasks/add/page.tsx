@@ -9,10 +9,12 @@ export default function Add() {
   const router = useRouter()
 
   const handleSubmit = async (e: React.FormEvent) => {
+    const token = localStorage.getItem("token");
+    if (!token) throw new Error("please login first")
     e.preventDefault()
-    axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/tasks/add`, task, { withCredentials: true })
-    .then(() => router.push('/tasks'))
-    .catch(err => console.error(err));
+    axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/task/user`, task, { headers: { Authorization: `Bearer ${token}` } })
+      .then(() => router.push('/tasks'))
+      .catch(err => console.error(err));
   }
 
   return (

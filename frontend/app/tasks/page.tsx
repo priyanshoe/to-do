@@ -23,41 +23,69 @@ export default function TodoPage() {
 
 
   const [tasks, setTasks] = useState([])
+  // const tasks = tasksData;
+
+  async function fetchTask() {
+    try {
+      const token = localStorage.getItem("token");
+      const taskData = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/task/user`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      setTasks(taskData.data.data);
+
+    } catch (err: any) {
+      console.log(err.response);
+      alert(err.response.data.message);
+
+    }
+
+  }
+
+
+  const handleComplete = (taskId: number) => {
+
+    const token = localStorage.getItem("token");
+    axios.put(`${process.env.NEXT_PUBLIC_API_URL}/api/task/user/${taskId}`, {}, { headers: { Authorization: `Bearer ${token}` } })
+      .then((res) => {
+        fetchTask();
+        alert(res.data.message)
+      })
+      .catch((err) => {
+        console.log(err.response)
+        alert(err.response.data.message)
+      })
+  }
+
 
 
   useEffect(() => {
-    axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/tasks`, { withCredentials: true })
-      .then(res => {
-        setTasks(res.data.data);
-      })
-      .catch(err => {
-        alert(err.response.data.message)
-        router.push("/")
-        console.error(err.data)
-      });
+    fetchTask();
+
 
   }, [])
 
   const handleLogOut = () => {
-    axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/logout`,{}, { withCredentials: true })
-      .then(res => {
-        alert(res.data.message)
-        router.push('/')
-      })
-      .catch(err => {
-        alert(err.response.data.message)
-        console.error(err.data)
-      });
+    localStorage.clear();
+    router.push('/')
   }
 
   const handleDelete = (id: number) => {
-    axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/tasks/delete`, { id }, { withCredentials: true })
-      .then(() => window.location.reload())
+    const token = localStorage.getItem("token");
+    axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/api/task/user/${id}`, { headers: { Authorization: `Bearer ${token}` } })
+      .then((res) => {
+        alert(res.data.message)
+        window.location.reload()
+      })
       .catch(err => {
         alert(err.response.data.message)
-        console.error(err)
+        console.error(err.response)
       });
   }
+
+
+
 
   return (
     <div className="main w-full h-full bg-zinc-800 p-4">
@@ -76,23 +104,35 @@ export default function TodoPage() {
 
       <div className='task-container mt-8'>
 
-        {
+        {tasks &&
           tasks.map((elem: {
-            taskId: number,
+            task_id: number,
             bgcolor: string,
             title: string,
-            description: string
+            description: string,
+            isCompleted: boolean
           }, index) => (
-            <div key={index} className={`flex items-center justify-between px-2 py-1 mt-6 ${colors[index % colors.length]} `}>
+            <div key={index} className={`flex items-center justify-between px-2 py-1 mt-6  ${elem.isCompleted ? "bg-gray-800 text-gray-500" : colors[index % colors.length]}`}>
               <div>
                 <h2 className="text-2xl font-medium">{elem.title}</h2>
                 <h3 className="text-base w-9/10 ml-2">{elem.description}</h3>
               </div>
-              <button
-                onClick={() => handleDelete(elem.taskId)}
-                className="">
-                <Trash2 />
-              </button>
+              <div>
+
+                <div className="flex flex-wrap items-center justify-center gap-6 md:gap-14">
+                  <label className="flex gap-3 items-center cursor-pointer">
+                    <span className={`${elem.isCompleted ? "hidden" : ""} text-white-700 select-none`}>Mark as Complete</span>
+                    <input type="checkbox" className="hidden peer" checked={elem.isCompleted} onChange={() => handleComplete(elem.task_id)} />
+                    <span className="w-5 h-5 border border-white-600 rounded-full relative flex items-center justify-center peer-checked:after:content-[''] peer-checked:after:w-2.5 peer-checked:after:h-2.5 peer-checked:after:bg-black peer-checked:border-black peer-checked:after:rounded-full peer-checked:after:absolute"></span>
+                  </label>
+
+                  <button
+                    onClick={() => handleDelete(elem.task_id)}
+                    className="">
+                    <Trash2 />
+                  </button>
+                </div>
+              </div>
             </div>
 
           ))
