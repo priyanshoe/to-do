@@ -26,8 +26,10 @@ export default function Home() {
     e.preventDefault();
     if (signUpData.password !== conform_password)
       return alert("Password not matched");
-    axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/signup`, signUpData, { withCredentials: true })
+    axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/sign-up`, signUpData)
       .then(res => {
+        console.log(res);
+        localStorage.setItem("token", res.data.data)
         alert(res.data.message)
         router.push('/tasks')
       })
@@ -52,14 +54,15 @@ export default function Home() {
 
   const handleSignIn = (e: React.FormEvent) => {
     e.preventDefault();
-    axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/login`, signInData, { withCredentials: true })
+    axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/sign-in`, signInData)
       .then(res => {
+        localStorage.setItem("token", res.data.data)
         alert(res.data.message)
         router.push('/tasks');
       })
       .catch(err => {
+        console.error(err.response)
         alert(err.response.data.message)
-        console.error(err)
       });
   }
 
