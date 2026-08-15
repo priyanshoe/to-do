@@ -28,6 +28,10 @@ export default function TodoPage() {
   async function fetchTask() {
     try {
       const token = localStorage.getItem("token");
+      if (!token) {
+        alert("please login first");
+        router.push("/")
+      }
       const taskData = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/task/user`, {
         headers: {
           Authorization: `Bearer ${token}`
@@ -72,6 +76,13 @@ export default function TodoPage() {
   }
 
   const handleDelete = (id: number) => {
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this task?"
+    );
+    if (!confirmed) {
+      return;
+    }
+
     const token = localStorage.getItem("token");
     axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/api/task/user/${id}`, { headers: { Authorization: `Bearer ${token}` } })
       .then((res) => {
