@@ -32,7 +32,8 @@ export default function TodoPage() {
         alert("please login first");
         router.push("/")
       }
-      const taskData = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/task/user`, {
+      const taskData = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/tasks`, {
+        withCredentials:true,
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -51,7 +52,10 @@ export default function TodoPage() {
   const handleComplete = (taskId: number) => {
 
     const token = localStorage.getItem("token");
-    axios.put(`${process.env.NEXT_PUBLIC_API_URL}/api/task/user/${taskId}`, {}, { headers: { Authorization: `Bearer ${token}` } })
+    axios.put(`${process.env.NEXT_PUBLIC_API_URL}/api/task/user/${taskId}`, {}, {
+        withCredentials:true,
+         headers: { Authorization: `Bearer ${token}` }
+         })
       .then((res) => {
         fetchTask();
         alert(res.data.message)
@@ -72,7 +76,13 @@ export default function TodoPage() {
 
   const handleLogOut = () => {
     localStorage.clear();
-    router.push('/')
+    axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/sign-out`, { withCredentials:true})
+    .then(()=>router.push('/'))
+      .catch(err => {
+        alert(err.response.data.message)
+        console.error(err.response)
+      });
+
   }
 
   const handleDelete = (id: number) => {
@@ -84,7 +94,7 @@ export default function TodoPage() {
     }
 
     const token = localStorage.getItem("token");
-    axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/api/task/user/${id}`, { headers: { Authorization: `Bearer ${token}` } })
+    axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/api/tasks/delete/${id}`, { withCredentials:true, headers: { Authorization: `Bearer ${token}` } })
       .then((res) => {
         alert(res.data.message)
         window.location.reload()
@@ -117,7 +127,7 @@ export default function TodoPage() {
 
         {tasks &&
           tasks.map((elem: {
-            task_id: number,
+            id: number,
             bgcolor: string,
             title: string,
             description: string,
@@ -133,12 +143,12 @@ export default function TodoPage() {
                 <div className="flex flex-wrap items-center justify-center gap-6 md:gap-14">
                   <label className="flex gap-3 items-center cursor-pointer">
                     <span className={`${elem.isCompleted ? "hidden" : ""} text-white-700 select-none`}>Mark as Complete</span>
-                    <input type="checkbox" className="hidden peer" checked={elem.isCompleted} onChange={() => handleComplete(elem.task_id)} />
+                    <input type="checkbox" className="hidden peer" checked={elem.isCompleted} onChange={() => handleComplete(elem.id)} />
                     <span className="w-5 h-5 border border-white-600 rounded-full relative flex items-center justify-center peer-checked:after:content-[''] peer-checked:after:w-2.5 peer-checked:after:h-2.5 peer-checked:after:bg-black peer-checked:border-black peer-checked:after:rounded-full peer-checked:after:absolute"></span>
                   </label>
 
                   <button
-                    onClick={() => handleDelete(elem.task_id)}
+                    onClick={() => handleDelete(elem.id)}
                     className="">
                     <Trash2 />
                   </button>

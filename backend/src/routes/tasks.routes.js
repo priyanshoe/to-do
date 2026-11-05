@@ -7,6 +7,6 @@ router.get('/', tasks.getTasks)
 
 router.post('/add', tasks.createTask)
 
-router.post('/delete', tasks.deleteTask)
+router.delete('/delete/:id', tasks.deleteTask)
 
 module.exports = router;

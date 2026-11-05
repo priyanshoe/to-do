@@ -23,7 +23,7 @@ async function registerUser(req, res) {
             sameSite: 'none',
             path:'/'
         })
-        return res.status(200).json({message:"user regestered"})
+        return res.status(200).json({message:"user regestered", data:token})
 
 
     } catch (err) {
@@ -43,14 +43,14 @@ async function loginUser(req, res) {
         if (user.length === 0) return res.status(404).json({ message: "user not found" })
         const hash = await bcrypt.compare(password, user[0].password)
         if (!hash) return res.status(401).json({ message: "wrong credential" });
-        const token = jwt.sign({ userId: user[0].userId }, jwt_secret)
+        const token = jwt.sign({ userId: user[0].id }, jwt_secret)
         res.cookie("token", token, {
             httpOnly: true,
             secure: true,
             sameSite: "none",
             path: "/",
         })
-        return res.status(200).json({ message: "login success" });
+        return res.status(200).json({ message: "login success", data:token });
 
     } catch (err) {
         return res.status(500).json({ message: "login failed", error: err.message });

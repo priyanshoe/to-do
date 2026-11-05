@@ -26,7 +26,7 @@ export default function Home() {
     e.preventDefault();
     if (signUpData.password !== conform_password)
       return alert("Password not matched");
-    axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/sign-up`, signUpData)
+    axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/sign-up`, signUpData,{withCredentials:true})
       .then(res => {
         console.log(res);
         localStorage.setItem("token", res.data.data)
@@ -54,7 +54,7 @@ export default function Home() {
 
   const handleSignIn = (e: React.FormEvent) => {
     e.preventDefault();
-    axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/sign-in`, signInData)
+    axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/sign-in`, signInData,{withCredentials:true})
       .then(res => {
         localStorage.setItem("token", res.data.data)
         alert(res.data.message)

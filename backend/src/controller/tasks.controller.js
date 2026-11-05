@@ -42,19 +42,20 @@ async function createTask(req, res) {
 
 async function deleteTask(req, res) {
     try{
-        const { id } = req.body
+        const { id } = req.params
+        if(id === null || id === undefined) return res.status(409).json({ message: "task is not provided" });
         
         token = req.cookies.token;
         if (!token) return res.status(401).json({ message: "Not authorised" });
 
-        const checkTask = `SELECT taskId, userId from ${table_name} WHERE taskId = ?`
+        const checkTask = `SELECT id, userId from ${table_name} WHERE id = ?`
         const [IDs] = await pool.query(checkTask,[id]);
         if(IDs.length===0) return res.status(500).json({message:"Task not fond"});
         const tokenData = jwt.verify(token, jwt_secret)
         if(tokenData.userId !== IDs[0].userId) return res.status(500).json({message:"Not authorised"})
 
-        const query = `DELETE from ${table_name} WHERE taskId = ?`;
-        const deleted = await pool.query(query, [id]);
+        const query = `DELETE from ${table_name} WHERE id = ? AND userId = ?`;
+        const deleted = await pool.query(query, [id, IDs[0].userId]);
         return res.status(200).json({ message: "task deleted", data: deleted })
     } catch (err) {
         return res.status(500).json({ message: "failed", error: err.message });
