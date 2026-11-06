@@ -76,7 +76,7 @@ async function testConnection() {
                 (2, 'User 2 generated', 'user2@gmail.com', '${user2hash}')
             `);
 
-            console.log("Users Seed data inserted successfully");
+            console.log("✅ Users Seed data inserted successfully");
         } else {
             console.log("Users table already has data");
         }
@@ -84,18 +84,18 @@ async function testConnection() {
             await pool.query(`
                 INSERT INTO tasks (userId, title, description)
                 VALUES
-                (2, "Learn Node.js", "Learn Express.js and Node.js basics"),
-                (2, "Learn MySQL", "Practice SQL queries and database operations"),
-                (2, "Build Todo App", "Create a full-stack todo application")
+                (1, "Learn Node.js", "Learn Express.js and Node.js basics"),
+                (1, "Learn MySQL", "Practice SQL queries and database operations"),
+                (1, "Build Todo App", "Create a full-stack todo application")
             `);
 
-            console.log("Tasks Seed data inserted successfully");
+            console.log("✅ Tasks Seed data inserted successfully");
         } else {
             console.log("Tasks table already has data");
         }
 
     } catch (error) {
-        console.error("Database seeding failed:", error);
+        console.error("❌ Database seeding failed:", error);
     }
 };
 

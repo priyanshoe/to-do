@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
 const pool = require('../db/connection')
+const redisClient = require("../db/redis");
 
 require('dotenv').config();
 const jwt_secret = process.env.JWT_SECRET;
@@ -10,8 +11,34 @@ async function getTasks(req, res) {
         token = req.cookies.token;
         if (!token) return res.status(401).json({ message: "Please login first" });
         const tokenData = jwt.verify(token, jwt_secret);
+        const userId = tokenData.userId;
+        // check redis
+        const cacheKey = `tasks:user:${userId}`
+        let cachedTasks = null;
+        try {
+            cachedTasks = await redisClient.get(cacheKey);
+        } catch (redisError) {
+            console.error("Redis GET failed: ",redisError);
+            
+        }
+        if(cachedTasks != null){
+        return res.status(200).json({ message: "Data", data: JSON.parse(cachedTasks) })
+        }
+        
+        // fetch from database
         const query = `SELECT * FROM ${table_name} WHERE userId = ?`
-        const [data] = await pool.query(query, [tokenData.userId])
+        const [data] = await pool.query(query, [userId])
+        // save cache
+        try {
+            await redisClient.set(
+                cacheKey,
+                JSON.stringify(data),
+                { EX: 60}
+            )
+        } catch (redisError) {
+            console.error("Redis SET failed:", redisError.message);
+        }
+
         return res.status(200).json({ message: "Data", data: data })
 
     } catch (err) {
@@ -32,6 +59,7 @@ async function createTask(req, res) {
         ]
         const query = `INSERT INTO ${table_name} (userId, title, description) VALUES (?,?,?)`;
         const [inserted] = await pool.query(query, data);
+        await redisClient.del(`tasks:user:${tokenData.userId}`)
         return res.status(200).json({ message: "task added", data: inserted })
 
     } catch (err) {
@@ -56,6 +84,7 @@ async function deleteTask(req, res) {
 
         const query = `DELETE from ${table_name} WHERE id = ? AND userId = ?`;
         const deleted = await pool.query(query, [id, IDs[0].userId]);
+        await redisClient.del(`tasks:user:${tokenData.userId}`)
         return res.status(200).json({ message: "task deleted", data: deleted })
     } catch (err) {
         return res.status(500).json({ message: "failed", error: err.message });
